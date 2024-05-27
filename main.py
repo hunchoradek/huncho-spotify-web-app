@@ -60,11 +60,22 @@ def authenticated():
     return render_template('authenticated.html', user=user, recently_played_tracks=recently_played_tracks, currently_playing_track=currently_playing_track,  playlists_info=playlists, genres=[genre for genre, count in genres], counts=[count for genre, count in genres])
 
 @app.route('/')
-def home():
+def landing_page():
+    # Check if the user is logged in
+    if 'user' in session:
+        # If the user is logged in, redirect them to the authenticated page
+        return redirect(url_for('authenticated'))
+    else:
+        # If the user is not logged in, render the landing page
+        return render_template('landing_page.html')
+    
+@app.route('/login')
+def login():
     if not sp_oauth.validate_token(cache_handler.get_cached_token()):
         auth_url = sp_oauth.get_authorize_url()
         return redirect(auth_url)
-    return redirect(url_for('authenticated'))
+    else:
+        return redirect(url_for('authenticated'))
 
 @app.route('/callback')
 def callback():
@@ -156,11 +167,75 @@ def create_recommended_playlist():
     flash("Recommended playlist created successfully")
     return redirect(url_for('get_top_tracks', time_range=time_range))
 
+@app.route('/create_playlist_based_on_button', methods=['GET', 'POST'])
+def create_playlist_based_on_button():
+    if request.method == 'POST':
+        button_pressed = request.form.get('button')  # assuming the button name is 'button'
+
+        if button_pressed:
+            # Get the time range from the button pressed
+            time_range = '_'.join(button_pressed.split('_')[:2])
+
+            # Get the user's top tracks or artists based on the button pressed
+            if button_pressed in ['short_term_tracks', 'medium_term_tracks', 'long_term_tracks']:
+                items = sp.current_user_top_tracks(limit=5, time_range=time_range)['items']
+                seed_type = 'tracks'
+            elif button_pressed in ['short_term_artists', 'medium_term_artists', 'long_term_artists']:
+                items = sp.current_user_top_artists(limit=5, time_range=time_range)['items']
+                seed_type = 'artists'
+            else:
+                return "Invalid button pressed", 400
+
+            # Get the IDs of the top tracks or artists
+            seed_ids = [item['id'] for item in items]
+
+            # Get recommendations based on the top tracks or artists
+            if seed_type == 'tracks':
+                recommendations = sp.recommendations(seed_tracks=seed_ids, limit=30)['tracks']
+            else:
+                recommendations = sp.recommendations(seed_artists=seed_ids, limit=30)['tracks']
+
+        else:
+            # New code for creating a playlist based on the artist names
+            artist_names = [request.form.get(f'artist{i}') for i in range(1, 6) if request.form.get(f'artist{i}')]
+
+            # Search for each artist and get their ID
+            seed_ids = []
+            for name in artist_names:
+                results = sp.search(q='artist:' + name, type='artist')
+                if results['artists']['items']:
+                    seed_ids.append(results['artists']['items'][0]['id'])
+
+            # Get recommendations based on the artists
+            recommendations = sp.recommendations(seed_artists=seed_ids, limit=30)['tracks']
+
+        recommendation_ids = [track['id'] for track in recommendations]
+
+        # Get the current date
+        current_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Create a new playlist and add the recommended tracks to it
+        user = sp.current_user()
+        playlist_name = f"Recommended Tracks ({button_pressed if button_pressed else 'User Artists'}, {current_date})"
+        playlist = sp.user_playlist_create(user['id'], playlist_name)
+
+        # Only try to add tracks to the playlist if there are any recommendations
+        if recommendation_ids:
+            sp.playlist_add_items(playlist['id'], recommendation_ids)
+            flash("Recommended playlist created successfully")
+        else:
+            flash("No recommendations found for the selected tracks or artists")
+
+        return render_template('playlist_creator.html')
+    else:
+        # If it's a GET request, just render the template
+        return render_template('playlist_creator.html')
+    
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     if request.method == 'POST':
         session.clear()
-        return redirect(url_for('home'))
+        return redirect(url_for('landing_page'))
     else:
         return '''
             <form method="POST">

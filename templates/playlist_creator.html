@@ -1,0 +1,36 @@
+{% extends "base.html" %} 
+{% block title %}selekTa - Playlist Creator{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1 class="display-1 m-5">Create a Playlist</h1>
+        <h2>Based on your top tracks or artists</h2>
+        <form action="{{ url_for('create_playlist_based_on_button') }}" method="post">
+            <div class="row justify-content-center">
+                <div class="col-12 text-center">
+                    <button type="submit" name="button" value="short_term_tracks" class="btn btn-info m-3">Last 4 weeks (tracks)</button>
+                    <button type="submit" name="button" value="short_term_artists" class="btn btn-info m-3">Last 4 weeks (artists)</button>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" name="button" value="medium_term_tracks" class="btn btn-secondary m-3">Last 6 months (tracks)</button>
+                    <button type="submit" name="button" value="medium_term_artists" class="btn btn-secondary m-3">Last 6 months (artists)</button>
+                </div>
+                <div class="col-12 text-center">
+                    <button type="submit" name="button" value="long_term_tracks" class="btn btn-warning m-3">Last 12 months (tracks)</button>
+                    <button type="submit" name="button" value="long_term_artists" class="btn btn-warning m-3">Last 12 months (artists)</button>
+                </div>
+            </div>
+        </form>
+        <h2>Or create a playlist based on specific artists</h2>
+        <form action="{{ url_for('create_playlist_based_on_button') }}" method="post">
+            <div class="form-group d-flex flex-column align-items-center">
+                <input type="text" name="artist1" placeholder="Artist 1" class="form-control input-width m-3">
+                <input type="text" name="artist2" placeholder="Artist 2" class="form-control input-width m-3">
+                <input type="text" name="artist3" placeholder="Artist 3" class="form-control input-width m-3">
+                <input type="text" name="artist4" placeholder="Artist 4" class="form-control input-width m-3">
+                <input type="text" name="artist5" placeholder="Artist 5" class="form-control input-width m-3">
+                <input type="submit" value="Create Playlist" class="btn btn-success m-3">
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Huncho - Top Artists{% endblock %}
+{% block title %}selekTa - Top Artists{% endblock %}
 
 {% block content %}
-<h1 style="font-size: 2.5em; text-align: center; padding: 20px;">{{ user['display_name'] }}'s Top Artists</h1>
+<h1 class="display-1 m-5 text-center">{{ user['display_name'] }}'s Top Artists</h1>
 
 <div class="d-flex justify-content-center">
     <form method="get" action="{{ url_for('get_top_artists') }}" class="form-inline my-2">
