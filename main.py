@@ -16,7 +16,7 @@ app.config['SESSION_PERMANENT'] = timedelta(minutes=5)
 
 client_id = 'fa7d7e379e7f42ca859cea494351fcc5'
 client_secret = '614d81cfdc344adfb4787bff30a8e98e'
-redirect_uri = 'http://localhost:5000/callback'
+redirect_uri = 'https://selekta.onrender.com/callback'
 scope = 'playlist-read-private playlist-read-collaborative user-top-read user-read-recently-played user-read-currently-playing playlist-modify-public playlist-modify-private'
 
 cache_handler = FlaskSessionCacheHandler(session)
