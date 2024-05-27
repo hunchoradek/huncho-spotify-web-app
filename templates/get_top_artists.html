@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Huncho - Top Artists{% endblock %}
+
+{% block content %}
+<h1 style="font-size: 2.5em; text-align: center; padding: 20px;">{{ user['display_name'] }}'s Top Artists</h1>
+
+<div class="d-flex justify-content-center">
+    <form method="get" action="{{ url_for('get_top_artists') }}" class="form-inline my-2">
+        <label for="time_range" class="mr-2">Select time range:</label>
+        <select name="time_range" id="time_range" class="form-control" onchange="this.form.submit()">
+            <option value="short_term" {% if time_range == 'short_term' %}selected{% endif %}>Last 4 weeks</option>
+            <option value="medium_term" {% if time_range == 'medium_term' %}selected{% endif %}>Last 6 months</option>
+            <option value="long_term" {% if time_range == 'long_term' %}selected{% endif %}>Last 12 months</option>
+        </select>
+    </form>
+</div>
+
+<div class="row">
+    {% for artist in artists['items'] %}
+        {% if loop.index <= 2 %}
+            <div class="col-12 mb-4">
+                <div class="card h-100">
+                    <img src="{{ artist['images'][0]['url'] }}" class="card-img-top" alt="{{ artist['name'] }}" style="object-fit: cover; height: 300px;">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {% if loop.index == 1 %}
+                                <span class="badge rounded-pill bg-warning">{{ loop.index }}</span>
+                            {% elif loop.index == 2 %}
+                                <span class="badge rounded-pill bg-secondary">{{ loop.index }}</span>
+                            {% endif %}
+                            <a href="{{ artist['external_urls']['spotify'] }}">{{ artist['name'] }}</a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        {% elif loop.index == 3 %}
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ artist['images'][0]['url'] }}" class="card-img-top" alt="{{ artist['name'] }}" style="object-fit: cover; height: 200px;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <span class="badge rounded-pill bg-info">{{ loop.index }}</span>
+                                <a href="{{ artist['external_urls']['spotify'] }}">{{ artist['name'] }}</a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+        {% else %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ artist['images'][0]['url'] }}" class="card-img-top" alt="{{ artist['name'] }}" style="object-fit: cover; height: 200px;">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <span class="badge rounded-pill bg-info">{{ loop.index }}</span>
+                                <a href="{{ artist['external_urls']['spotify'] }}">{{ artist['name'] }}</a>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                {% if loop.index == artists['items']|length %}
+                    </div>
+                {% endif %}
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

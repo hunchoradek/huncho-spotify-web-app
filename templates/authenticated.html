@@ -1,0 +1,150 @@
+{% extends "base_home.html" %}
+
+{% block title %}Huncho - Homepage{% endblock %}
+
+{% block userinfo_content %}
+<div class="row">
+    <div class="col-md-4 d-flex justify-content-center">
+        <img src="{{ user['images'][1]['url'] if user['images'] else 'No profile picture' }}" alt="{{ user['display_name'] }}'s profile picture" class="img-fluid rounded-circle mx-auto d-block" style="width: 70%; height: auto;">
+    </div>
+    <div class="col-md-8 d-flex flex-column justify-content-center text-center">
+        <h1>Welcome, {{ user['display_name'] }}!</h1>
+        <p>Spotify user ID: {{ user['id'] }}</p>
+        <p>Number of followers: {{ user['followers']['total'] }}</p>
+        <p>Spotify URI: {{ user['uri'] }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block recently_played_content %}
+<h1 class="p-3 text-center">Recently Played Tracks</h1>
+<div class="row row-cols-1 row-cols-md-2 g-4">
+    {% for track in recently_played_tracks['items'] %}
+    {% if loop.index <= 4 %}
+    <div class="col">
+        <div class="card h-100">
+            <img src="{{ track['track']['album']['images'][0]['url'] }}" class="card-img-top" alt="{{ track['track']['name'] }}" style="object-fit: cover; height: 200px;">
+            <div class="card-body">
+                <h5 class="card-title">{{ track['track']['name'] }}</h5>
+                <p class="card-text">Artist: {{ track['track']['artists'][0]['name'] }}</p>
+                <a href="{{ track['track']['external_urls']['spotify'] }}" class="btn btn-success">Open on Spotify</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block currently_playing_content %}
+<h1 class="p-3 text-center">Currently Playing Track</h1>
+<div class="row">
+    <div class="col text-center">
+        {% if currently_playing_track['item'] %}
+        <div class="card h-100">
+            <img src="{{ currently_playing_track['item']['album']['images'][0]['url'] }}" class="card-img-top" alt="{{ currently_playing_track['item']['name'] }}" style="object-fit: cover; height: 550px;">
+            <div class="card-body">
+                <h5 class="card-title">{{ currently_playing_track['item']['name'] }}</h5>
+                <p class="card-text">Artist: {{ currently_playing_track['item']['artists'][0]['name'] }}</p>
+                <a href="{{ currently_playing_track['item']['external_urls']['spotify'] }}" class="btn btn-success">Open on Spotify</a>
+            </div>
+        </div>
+        {% else %}
+        <p>No track is currently playing.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block playlists_content %}
+<h1 class="p-3 text-center">{{ user['display_name'] }}'s Playlists</h1>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for playlist in playlists_info['items'] %}
+    <div class="col playlist-row">
+        <div class="card h-100">
+            <img src="{{ playlist['images'][0]['url'] }}" class="card-img-top" alt="{{ playlist['name'] }}" style="object-fit: cover; height: 200px;">
+            <div class="card-body">
+                <h5 class="card-title">{{ playlist['name'] }}</h5>
+                <a href="{{ playlist['external_urls']['spotify'] }}" class="btn btn-success">Open on Spotify</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<div class="text-center p-3">
+    <button id="show-more-button" class="btn btn-primary me-2">Show More</button>
+    <button id="show-less-button" class="btn btn-primary" style="display: none;">Show Less</button>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Get all the playlist rows and the buttons
+        var playlistRows = $('.playlist-row');
+        var showMoreButton = $('#show-more-button');
+        var showLessButton = $('#show-less-button');
+    
+        // Initially hide all but the first six playlist rows
+        for (var i = 6; i < playlistRows.length; i++) {
+            $(playlistRows[i]).hide();
+        }
+    
+        // Show the rest of the playlist rows and the show less button when the show more button is clicked
+        showMoreButton.click(function() {
+            for (var i = 6; i < playlistRows.length; i++) {
+                $(playlistRows[i]).show();
+            }
+    
+            // Hide the show more button and show the show less button
+            showMoreButton.hide();
+            showLessButton.show();
+        });
+    
+        // Hide the rest of the playlist rows and the show less button when the show less button is clicked
+        showLessButton.click(function() {
+            for (var i = 6; i < playlistRows.length; i++) {
+                $(playlistRows[i]).hide();
+            }
+    
+            // Hide the show less button and show the show more button
+            showLessButton.hide();
+            showMoreButton.show();
+        });
+    });
+    </script>
+{% endblock %}
+
+{% block genres_content %}
+<h1 class="p-3 text-center">{{ user['display_name'] }}'s Top Genres</h1>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <canvas id="myChart" width="800" height="800"></canvas>  <!-- Set the width and height of the canvas -->
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ genres|tojson }},
+            datasets: [{
+                data: {{ counts|tojson }},
+                backgroundColor: 'rgba(54, 162, 235, 1)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    display: false  // Hide the legend
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    </script>
+{% endblock %}
+

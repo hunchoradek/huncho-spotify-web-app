@@ -1,0 +1,18 @@
+{% extends "base.html" %} {% block title %}Huncho - Playlists{% endblock %}
+
+{% block content %}
+<h1>{{ user['display_name'] }}'s Playlists</h1>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for playlist in playlists_info['items'] %}
+    <div class="col">
+        <div class="card h-100">
+            <img src="{{ playlist['images'][0]['url'] }}" class="card-img-top" alt="{{ playlist['name'] }}" style="object-fit: cover; height: 200px;">
+            <div class="card-body">
+                <h5 class="card-title">{{ playlist['name'] }}</h5>
+                <a href="{{ playlist['external_urls']['spotify'] }}" class="btn btn-primary">Go to playlist</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
